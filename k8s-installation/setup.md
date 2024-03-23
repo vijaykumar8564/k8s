@@ -66,9 +66,11 @@ sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 ```
 - Run the below command in Master node to get the join token
-  - kubeadm token create --print-join-command
+  ```python
+  kubeadm token create --print-join-command
+  ```
   - copy the token and run in the node
   - to check node added to cluster run the below command
   ```python
-  kubeadm token create --print-join-command
+  kubectl get nodes
   ```
