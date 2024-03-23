@@ -40,7 +40,7 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/
 - At least 1 VM, but typically multiple for scalability and fault tolerance.(min 2vcpu, 2gb)
 - Components running on worker nodes include kubelet (for node management), kube-proxy, and container runtime (like Docker or containerd).
 
-- Run the below commands in Master node as a root user
+- Run the below commands in Worker node as a root user
 
 ```python
 curl -fsSL https://get.docker.com -o install-docker.sh
@@ -65,11 +65,11 @@ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 ```
-- Run the below command in Master node to get the join token
+- Run the below command in the Master to get the join token
   ```python
   kubeadm token create --print-join-command
   ```
-  - copy the token and run in the node add this cri-token to the join command 
+  - copy the token and run in the Worker node add this cri-token to the join command 
   ```python
   --cri-socket "unix:///var/run/cri-dockerd.sock"
   ```
