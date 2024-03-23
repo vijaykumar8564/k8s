@@ -116,3 +116,26 @@ my-app-5dc75f9877-v7k2g   0/1     Pending   0          9s    <none>   <none>   <
 my-app-5dc75f9877-wtxhx   0/1     Pending   0          9s    <none>   <none>   <none>           <none>
 my-app-5dc75f9877-x8bg9   0/1     Pending   0          9s    <none>   <none>   <none>           <none>
 ```
+- Now label a node with given value
+
+```python
+kubectl label node node env=dev
+```
+- then only pods created in specific node only
+
+```python
+kubectl get po -o wide
+NAME                      READY   STATUS    RESTARTS   AGE     IP             NODE   NOMINATED NODE   READINESS GATES
+my-app-5dc75f9877-29prt   1/1     Running   0          5m58s   10.244.1.165   node   <none>           <none>
+my-app-5dc75f9877-4jqrs   1/1     Running   0          5m58s   10.244.1.166   node   <none>           <none>
+my-app-5dc75f9877-7567n   1/1     Running   0          5m58s   10.244.1.160   node   <none>           <none>
+my-app-5dc75f9877-8c62q   1/1     Running   0          5m58s   10.244.1.163   node   <none>           <none>
+my-app-5dc75f9877-ccsd9   1/1     Running   0          5m58s   10.244.1.161   node   <none>           <none>
+my-app-5dc75f9877-s2dnm   1/1     Running   0          5m58s   10.244.1.159   node   <none>           <none>
+my-app-5dc75f9877-v2fpq   1/1     Running   0          5m58s   10.244.1.162   node   <none>           <none>
+my-app-5dc75f9877-v7k2g   1/1     Running   0          5m58s   10.244.1.164   node   <none>           <none>
+my-app-5dc75f9877-wtxhx   1/1     Running   0          5m58s   10.244.1.158   node   <none>           <none>
+my-app-5dc75f9877-x8bg9   1/1     Running   0          5m58s   10.244.1.157   node   <none>           <none>
+
+```
+
