@@ -69,7 +69,10 @@ sudo apt-get install -y kubelet kubeadm kubectl
   ```python
   kubeadm token create --print-join-command
   ```
-  - copy the token and run in the node
+  - copy the token and run in the node add this cri-token to the join command 
+  ```python
+  --cri-socket "unix:///var/run/cri-dockerd.sock"
+  ```
   - to check node added to cluster run the below command
   ```python
   kubectl get nodes
