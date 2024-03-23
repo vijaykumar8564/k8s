@@ -65,8 +65,6 @@ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 ```
-- Run the below command from your master node join command
--  kubeadm join 10.0.0.4:6443 --token a47cr0.8u39vuyywypfwv58         --discovery-token-ca-cert-hash sha256:a47b7589ed584434347d7261ed3684437f9a46477fd80397c14a24c1494efeb8 --cri-socket "unix:///var/run/cri-dockerd.sock"
 - Run the below command in Master node to get the join token
   - kubeadm token create --print-join-command
   - copy the token and run in the node
