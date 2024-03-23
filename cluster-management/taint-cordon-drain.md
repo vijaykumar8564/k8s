@@ -1,19 +1,19 @@
 # Cluster Management Commands:
   * cluster-info    Display cluster information
   * top             Display resource (CPU/memory) usage
-  ## cordon          Mark node as unschedulable
+  * cordon          Mark node as unschedulable
   ```python
   kubectl cordon <node-name>
   The kubectl cordon command is used in Kubernetes to mark a node as unschedulable. When you "cordon" a node, Kubernetes will prevent new pods from being scheduled onto that node. However, it allows existing pods on the node to continue running until they terminate or are manually moved elsewhere.
 
   ```
-### uncordon        Mark node as schedulable
+* uncordon        Mark node as schedulable
   ```python
   kubectl uncordon <node-name>
   The kubectl cordon command is used in Kubernetes to mark a node as schedulable.
   ```
 
-### drain           Drain node in preparation for maintenance
+* drain           Drain node in preparation for maintenance
   ```python
   kubectl drain node
   ```
@@ -21,7 +21,7 @@
 
 
   
-### Taints:
+* Taints:
     - Apply Taints: You can apply a taint to a node using the kubectl taint command. Taints have three components:
 
     - Key: The name of the taint.
@@ -34,7 +34,7 @@
     ```python
     kubectl taint nodes <node-name> key=value:effect
     ```
-### Tolerations:
+* Tolerations:
     - Define Tolerations in 
     - Pod Spec: To allow a pod to be scheduled onto a tainted node, you need to specify a toleration in the pod's YAML configuration.
     -  A toleration specifies the taint key, value, and effect that the pod tolerates.
@@ -46,14 +46,14 @@
       value: "value"
       effect: "NoSchedule"
     ```
-### Use Cases:
-Dedicated Nodes: You can taint nodes to dedicate them to specific types of workloads, such as machine learning jobs, databases, or system components.
+* Use Cases:
+  - Dedicated Nodes: You can taint nodes to dedicate them to specific types of workloads, such as machine learning jobs, databases, or system components.
 
-Isolation: Tainting nodes can be used to isolate certain nodes for specific purposes, such as running experimental or high-priority workloads.
+  - Isolation: Tainting nodes can be used to isolate certain nodes for specific purposes, such as running experimental or high-priority workloads.
 
-Resource Allocation: Taints can help manage resource allocation by ensuring that critical resources are reserved for specific types of workloads.
+  - Resource Allocation: Taints can help manage resource allocation by ensuring that critical resources are reserved for specific types of workloads.
 
-Node Maintenance: Tainting a node during maintenance prevents new pods from being scheduled onto the node until the maintenance is complete, ensuring that existing workloads are not disrupted
+  - Node Maintenance: Tainting a node during maintenance prevents new pods from being scheduled onto the node until the maintenance is complete, ensuring that existing workloads are not disrupted
 
 
 
