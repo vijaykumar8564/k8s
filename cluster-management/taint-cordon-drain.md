@@ -34,6 +34,15 @@
     ```python
     kubectl taint nodes <node-name> key=value:effect
     ```
+    - to check the taints on node
+    ```python
+    kubectl describe node <node-name> | grep "Taints"
+    ```
+    - untaint node
+    ```python
+    kubectl taint node master node-role.kubernetes.io/control-plane-
+    ```
+
 * Tolerations:
     - Define Tolerations in 
     - Pod Spec: To allow a pod to be scheduled onto a tainted node, you need to specify a toleration in the pod's YAML configuration.
@@ -156,4 +165,149 @@ Warning: deleting Pods that declare no controller: default/nginx-pod; ignoring D
 evicting pod default/nginx-pod
 pod/nginx-pod evicted
 node/node drained
+```
+
+# scenario 3:
+
+- taint the node try to deploy the pod 
+```python
+kubectl taint node env=dev:NoSchedule
+```
+- write the pod manifest pod.yaml
+
+```python
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pod-nginx
+  name: pod-nginx
+spec:
+  containers:
+  - image: nginx
+    name: pod-nginx
+    ports:
+    - containerPort: 80
+```
+- create the pod
+```python
+kubectl create -f pod.yaml
+```
+- check the pod events with kubectl describe pod-name
+- you will find this error
+- Lets add Toleartions to the pod
+```python
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: pod-nginx
+  name: pod-nginx
+spec:
+  containers:
+  - image: nginx
+    name: pod-nginx
+    ports:
+    - containerPort: 80
+  tolerations:
+    - key: "env"
+      operator: "Equal"
+      value: "dev"
+      effect: "NoSchedule"
+```
+- Now pod is running in the same node 
+
+```python
+kubectl get po -o wide
+NAME        READY   STATUS    RESTARTS   AGE     IP            NODE   NOMINATED NODE   READINESS GATES
+pod-nginx   1/1     Running   0          9m51s   10.244.1.12   node   <none>           <none>
+```
+
+# scenarion 4 
+- lets drain node but pods running on the node are to be run withouth interuption 
+- to make this possble you need to define the pod disruption budget
+- lets untaint the nodes
+- create deployment
+```python
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx
+        ports:
+        - containerPort: 80
+```
+
+- pods will run on both nodes
+
+```python
+kubectl get po -o wide
+NAME                      READY   STATUS    RESTARTS   AGE   IP            NODE     NOMINATED NODE   READINESS GATES
+my-app-69f64668bd-49hw9   1/1     Running   0          14s   10.244.0.15   master   <none>           <none>
+my-app-69f64668bd-98mzt   1/1     Running   0          14s   10.244.1.13   node     <none>           <none>
+my-app-69f64668bd-9pksz   1/1     Running   0          14s   10.244.1.14   node     <none>           <none>
+my-app-69f64668bd-bjxzw   1/1     Running   0          14s   10.244.1.15   node     <none>           <none>
+my-app-69f64668bd-btvtq   1/1     Running   0          14s   10.244.0.18   master   <none>           <none>
+my-app-69f64668bd-dcfnn   1/1     Running   0          14s   10.244.1.18   node     <none>           <none>
+my-app-69f64668bd-pphpc   1/1     Running   0          14s   10.244.1.16   node     <none>           <none>
+my-app-69f64668bd-s7s2g   1/1     Running   0          14s   10.244.0.16   master   <none>           <none>
+my-app-69f64668bd-vcv49   1/1     Running   0          14s   10.244.0.17   master   <none>           <none>
+my-app-69f64668bd-zfscj   1/1     Running   0          14s   10.244.1.17   node     <none>           <none>
+```
+
+
+- Define the pod disruptionbudget
+
+```python
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+spec:
+  minAvailable: 870%
+  selector:
+    matchLabels:
+      app: my-app
+```
+
+- pod disruption budget 
+
+```python
+kubectl get poddisruptionbudget.policy
+NAME           MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+frontend-pdb   70%             N/A               3                     5s
+```
+
+- now drain the node wiith --ignore-daemonsets
+
+```python
+kubectl drain node --ignore-daemonsets
+```
+- Now all pods are placed in master node
+```python
+kubectl get po -o wide
+NAME                      READY   STATUS    RESTARTS   AGE    IP            NODE     NOMINATED NODE   READINESS GATES
+my-app-69f64668bd-2v8fw   1/1     Running   0          9s     10.244.0.22   master   <none>           <none>
+my-app-69f64668bd-49hw9   1/1     Running   0          7m1s   10.244.0.15   master   <none>           <none>
+my-app-69f64668bd-5xkbs   1/1     Running   0          9s     10.244.0.24   master   <none>           <none>
+my-app-69f64668bd-btvtq   1/1     Running   0          7m1s   10.244.0.18   master   <none>           <none>
+my-app-69f64668bd-hblkh   1/1     Running   0          14s    10.244.0.20   master   <none>           <none>
+my-app-69f64668bd-hqrx4   1/1     Running   0          14s    10.244.0.19   master   <none>           <none>
+my-app-69f64668bd-s7s2g   1/1     Running   0          7m1s   10.244.0.16   master   <none>           <none>
+my-app-69f64668bd-twlq8   1/1     Running   0          14s    10.244.0.21   master   <none>           <none>
+my-app-69f64668bd-vcv49   1/1     Running   0          7m1s   10.244.0.17   master   <none>           <none>
+my-app-69f64668bd-whfm5   1/1     Running   0          9s     10.244.0.23   master   <none>           <none>
 ```
