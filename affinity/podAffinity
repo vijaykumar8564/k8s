@@ -1,0 +1,82 @@
+* affinity
+- "affinity" refers to the mechanism used to influence the scheduling of pods onto nodes in the cluster based on certain rules or constraints.
+
+* podAffinity:
+- Pod affinity is a Kubernetes feature that allows you to influence the scheduling of pods based on the presence of other pods.
+- It specifies rules that govern how pods should be scheduled relative to other pods, promoting colocation or segregation based on specific criteria.
+- Pod affinity can be used to improve performance, reliability, and resource utilization within a Kubernetes cluster.
+
+* preferredDuringSchedulingIgnoredDuringExecution:
+- preferredDuringSchedulingIgnoredDuringExecution indicates that the rule is a soft preference and Kubernetes should try to satisfy it if possible but can ignore it during execution if necessary.
+
+```python
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  namespace: dev
+  labels:
+    env: dev
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+           - weight: 20
+             podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: env
+                  operator: In
+                  values: 
+                  - dev
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: my-container
+        image: nginx
+        ports:
+        - containerPort: 80
+```
+
+* requiredDuringSchedulingIgnoredDuringExecution:
+
+```python
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  namespace: dev
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - my-app
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: my-container
+        image: nginx
+        ports:
+        - containerPort: 80
+```
